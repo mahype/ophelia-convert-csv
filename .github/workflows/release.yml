@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./...
+
+  build-mac:
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build universal binary (arm64 + amd64)
+        run: |
+          set -euo pipefail
+          CGO_ENABLED=1 GOARCH=arm64 go build -ldflags="-s -w" -o CsvWatcher-arm64 ./cmd/csv-watcher
+          CGO_ENABLED=1 GOARCH=amd64 go build -ldflags="-s -w" -o CsvWatcher-amd64 ./cmd/csv-watcher
+          lipo -create CsvWatcher-arm64 CsvWatcher-amd64 -output CsvWatcher
+          rm CsvWatcher-arm64 CsvWatcher-amd64
+          file CsvWatcher
+
+      - name: Package as CsvWatcher.app
+        run: |
+          set -euo pipefail
+          APP="CsvWatcher.app"
+          mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+          mv CsvWatcher "$APP/Contents/MacOS/CsvWatcher"
+          cp cmd/csv-watcher/icon.png "$APP/Contents/Resources/AppIcon.png"
+          cat >"$APP/Contents/Info.plist" <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key><string>CsvWatcher</string>
+            <key>CFBundleDisplayName</key><string>CsvWatcher</string>
+            <key>CFBundleIdentifier</key><string>com.example.csvwatcher</string>
+            <key>CFBundleVersion</key><string>1.0</string>
+            <key>CFBundleShortVersionString</key><string>1.0</string>
+            <key>CFBundleExecutable</key><string>CsvWatcher</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>LSMinimumSystemVersion</key><string>11.0</string>
+            <key>LSUIElement</key><true/>
+          </dict>
+          </plist>
+          PLIST
+          zip -r CsvWatcher-macos.zip CsvWatcher.app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CsvWatcher-macos
+          path: CsvWatcher-macos.zip
+
+  build-windows:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Cross-compile Windows exe
+        run: |
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 \
+            go build -ldflags="-s -w -H windowsgui" -o CsvWatcher.exe ./cmd/csv-watcher
+          file CsvWatcher.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CsvWatcher-windows
+          path: CsvWatcher.exe
+
+  release:
+    needs: [build-mac, build-windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: CsvWatcher-macos
+          path: release/
+      - uses: actions/download-artifact@v4
+        with:
+          name: CsvWatcher-windows
+          path: release/
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/CsvWatcher-macos.zip
+            release/CsvWatcher.exe
+          generate_release_notes: true

@@ -1,0 +1,30 @@
+# Build artifacts
+/dist/
+
+# Lokaler Test-/Arbeitsordner (wird vom Watcher überwacht)
+/CSV-Daten/
+
+# Go test / build leftovers
+*.exe
+*.test
+*.out
+coverage.*
+
+# Temp files produced by fileio.WriteCSV during atomic rename
+*.tmp
+
+# Error sidecars produced by failed conversions
+*.error.log
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Claude / agent state (keep out of shared repo)
+.claude/
