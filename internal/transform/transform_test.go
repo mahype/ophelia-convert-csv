@@ -56,17 +56,17 @@ func TestApply_Row2LandmarkCells(t *testing.T) {
 	}
 }
 
-func TestApply_DataRowShiftAndPad(t *testing.T) {
+func TestApply_DataRowUnchangedAndPadded(t *testing.T) {
 	rows := [][]string{
 		{"EXTF"},
 		{"Adressnummer", "Konto"},
-		{"500192", "Traumschloss AG", "Herr", "Alter-Name", "Rest5", "Rest6"},
+		{"500192", "Traumschloss AG", "", "", "Rest5", "Rest6"},
 	}
 	Apply(rows)
 	if len(rows[2]) != TargetCols {
 		t.Fatalf("data row length = %d, want %d", len(rows[2]), TargetCols)
 	}
-	wantHead := []string{"", "500192", "Herr", "Traumschloss AG", "Rest5", "Rest6"}
+	wantHead := []string{"500192", "Traumschloss AG", "", "", "Rest5", "Rest6"}
 	if !reflect.DeepEqual(rows[2][:6], wantHead) {
 		t.Fatalf("row 3 head: got %v, want %v", rows[2][:6], wantHead)
 	}
@@ -87,8 +87,8 @@ func TestApply_ShortRowIsPaddedTo254(t *testing.T) {
 	if len(rows[2]) != TargetCols {
 		t.Fatalf("short row not padded: len = %d, want %d", len(rows[2]), TargetCols)
 	}
-	if rows[2][0] != "" || rows[2][1] != "500192" || rows[2][3] != "Traumschloss AG" {
-		t.Errorf("shift on short row failed: %v", rows[2][:4])
+	if rows[2][0] != "500192" || rows[2][1] != "Traumschloss AG" {
+		t.Errorf("row 3 head changed unexpectedly: %v", rows[2][:2])
 	}
 }
 
@@ -103,7 +103,7 @@ func TestApply_MultipleDataRows(t *testing.T) {
 	Apply(rows)
 
 	for i, want := range []struct {
-		b, d, e string
+		a, b, e string
 	}{
 		{"500192", "Firma A", "X"},
 		{"500193", "Firma B", "Y"},
@@ -113,7 +113,7 @@ func TestApply_MultipleDataRows(t *testing.T) {
 		if len(row) != TargetCols {
 			t.Errorf("row %d length = %d, want %d", i+2, len(row), TargetCols)
 		}
-		if row[0] != "" || row[1] != want.b || row[3] != want.d || row[4] != want.e {
+		if row[0] != want.a || row[1] != want.b || row[4] != want.e {
 			t.Errorf("row %d head wrong: %v", i+2, row[:5])
 		}
 	}

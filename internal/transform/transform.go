@@ -2,8 +2,7 @@
 //
 //	Zeile 1:   unverändert (EXTF-Metadaten)
 //	Zeile 2:   komplett durch TargetHeader (254 Spalten) ersetzt
-//	Zeile 3+:  rechts auf 254 Spalten aufgefüllt, dann Spaltenshift
-//	           D := B; B := A; A := ""  (A=0, B=1, C=2, D=3)
+//	Zeile 3+:  unverändert, bei Bedarf rechts auf 254 Spalten aufgefüllt
 package transform
 
 // TargetCols ist die DATEV-Debitoren-Spaltenzahl (254).
@@ -281,9 +280,6 @@ func Apply(rows [][]string) [][]string {
 		for len(rows[i]) < TargetCols {
 			rows[i] = append(rows[i], "")
 		}
-		rows[i][3] = rows[i][1]
-		rows[i][1] = rows[i][0]
-		rows[i][0] = ""
 	}
 	return rows
 }

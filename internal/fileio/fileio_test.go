@@ -67,14 +67,17 @@ func TestEndToEnd_RealExampleFile(t *testing.T) {
 	if len(rows[2]) != transform.TargetCols {
 		t.Errorf("row 3 length = %d, want %d", len(rows[2]), transform.TargetCols)
 	}
-	if rows[2][0] != "" {
-		t.Errorf("row 3 A not cleared: %q", rows[2][0])
+	if rows[2][0] != "500192" {
+		t.Errorf("row 3 col 1 = %q, want %q", rows[2][0], "500192")
 	}
-	if rows[2][1] != "500192" {
-		t.Errorf("row 3 B = %q, want %q", rows[2][1], "500192")
+	if rows[2][1] != "Traumschloss AG" {
+		t.Errorf("row 3 col 2 = %q, want %q", rows[2][1], "Traumschloss AG")
 	}
-	if rows[2][3] != "Traumschloss AG" {
-		t.Errorf("row 3 D = %q, want %q", rows[2][3], "Traumschloss AG")
+	if rows[2][15] != "Im Hexfeld 22" {
+		t.Errorf("row 3 col 16 = %q, want %q", rows[2][15], "Im Hexfeld 22")
+	}
+	if rows[2][19] != "DE" {
+		t.Errorf("row 3 col 20 = %q, want %q", rows[2][19], "DE")
 	}
 
 	tmp := t.TempDir()

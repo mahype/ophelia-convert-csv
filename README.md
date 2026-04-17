@@ -5,9 +5,10 @@ umsortiert:
 
 - **Zeile 1** bleibt unverändert (EXTF-Metadaten).
 - **Zeile 2** (Kopfzeile) wird komplett durch den 254-spaltigen DATEV-Debitoren-Header
-  (`transform.TargetHeader`) ersetzt.
-- **Zeile 3+** (Datenzeilen): rechts mit leeren Feldern auf 254 Spalten aufgefüllt, dann
-  Spalte D = alte Spalte B; Spalte B = alte Spalte A; Spalte A = leer.
+  (`transform.TargetHeader`) ersetzt — die Daten stehen bereits in den richtigen Spalten,
+  nur die Beschriftungen im Original-Export passen nicht zum DATEV-Import.
+- **Zeile 3+** (Datenzeilen) bleiben inhaltlich unverändert, werden aber bei Bedarf rechts
+  mit leeren Feldern auf 254 Spalten aufgefüllt.
 
 Das Original landet danach im Unterordner `verarbeitet/`, die umgewandelte Datei nimmt
 den Namen der Originaldatei im überwachten Ordner ein.
