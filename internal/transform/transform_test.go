@@ -18,62 +18,103 @@ func TestApply_Row1Unchanged(t *testing.T) {
 	}
 }
 
-func TestApply_Row2ClearsA(t *testing.T) {
+func TestApply_Row2ReplacedByTargetHeader(t *testing.T) {
 	rows := [][]string{
 		{"EXTF"},
 		{"Adressnummer", "Konto", "Anrede", "Name"},
 		{"500192", "Traumschloss AG", "", ""},
 	}
 	Apply(rows)
-	want := []string{"", "Konto", "Anrede", "Name"}
-	if !reflect.DeepEqual(rows[1], want) {
-		t.Fatalf("row 2: got %v, want %v", rows[1], want)
+	if len(rows[1]) != TargetCols {
+		t.Fatalf("row 2 length = %d, want %d", len(rows[1]), TargetCols)
+	}
+	if !reflect.DeepEqual(rows[1], TargetHeader) {
+		t.Fatalf("row 2 is not TargetHeader")
 	}
 }
 
-func TestApply_DataRowShift(t *testing.T) {
+func TestApply_Row2LandmarkCells(t *testing.T) {
 	rows := [][]string{
 		{"EXTF"},
-		{"Adressnummer", "Konto", "Anrede", "Name"},
+		{"Adressnummer", "Konto"},
+	}
+	Apply(rows)
+	checks := map[int]string{
+		0:   "Konto",
+		1:   "Name (Adressattyp Unternehmen)",
+		8:   "EU-Land",
+		9:   "EU-UStID",
+		95:  "Leerfeld 1",
+		203: "SWIFTCode 9",
+		221: "SEPA Mandatsreferenz 1",
+		253: "Letzte Frist",
+	}
+	for i, want := range checks {
+		if rows[1][i] != want {
+			t.Errorf("row 2 col %d = %q, want %q", i+1, rows[1][i], want)
+		}
+	}
+}
+
+func TestApply_DataRowShiftAndPad(t *testing.T) {
+	rows := [][]string{
+		{"EXTF"},
+		{"Adressnummer", "Konto"},
 		{"500192", "Traumschloss AG", "Herr", "Alter-Name", "Rest5", "Rest6"},
 	}
 	Apply(rows)
-	want := []string{"", "500192", "Herr", "Traumschloss AG", "Rest5", "Rest6"}
-	if !reflect.DeepEqual(rows[2], want) {
-		t.Fatalf("row 3: got %v, want %v", rows[2], want)
+	if len(rows[2]) != TargetCols {
+		t.Fatalf("data row length = %d, want %d", len(rows[2]), TargetCols)
+	}
+	wantHead := []string{"", "500192", "Herr", "Traumschloss AG", "Rest5", "Rest6"}
+	if !reflect.DeepEqual(rows[2][:6], wantHead) {
+		t.Fatalf("row 3 head: got %v, want %v", rows[2][:6], wantHead)
+	}
+	for i := 6; i < TargetCols; i++ {
+		if rows[2][i] != "" {
+			t.Errorf("row 3 col %d = %q, want empty", i+1, rows[2][i])
+		}
 	}
 }
 
-func TestApply_ShortRowIsPadded(t *testing.T) {
+func TestApply_ShortRowIsPaddedTo254(t *testing.T) {
 	rows := [][]string{
 		{"EXTF"},
 		{"Adressnummer", "Konto"},
 		{"500192", "Traumschloss AG"},
 	}
 	Apply(rows)
-	want := []string{"", "500192", "", "Traumschloss AG"}
-	if !reflect.DeepEqual(rows[2], want) {
-		t.Fatalf("short row: got %v, want %v", rows[2], want)
+	if len(rows[2]) != TargetCols {
+		t.Fatalf("short row not padded: len = %d, want %d", len(rows[2]), TargetCols)
+	}
+	if rows[2][0] != "" || rows[2][1] != "500192" || rows[2][3] != "Traumschloss AG" {
+		t.Errorf("shift on short row failed: %v", rows[2][:4])
 	}
 }
 
 func TestApply_MultipleDataRows(t *testing.T) {
 	rows := [][]string{
 		{"EXTF"},
-		{"Adressnummer", "Konto", "Anrede", "Name"},
+		{"Adressnummer", "Konto"},
 		{"500192", "Firma A", "", "", "X"},
 		{"500193", "Firma B", "", "", "Y"},
 		{"500194", "Firma C", "", "", "Z"},
 	}
 	Apply(rows)
 
-	for i, wantRow := range [][]string{
-		{"", "500192", "", "Firma A", "X"},
-		{"", "500193", "", "Firma B", "Y"},
-		{"", "500194", "", "Firma C", "Z"},
+	for i, want := range []struct {
+		b, d, e string
+	}{
+		{"500192", "Firma A", "X"},
+		{"500193", "Firma B", "Y"},
+		{"500194", "Firma C", "Z"},
 	} {
-		if !reflect.DeepEqual(rows[i+2], wantRow) {
-			t.Errorf("row %d: got %v, want %v", i+2, rows[i+2], wantRow)
+		row := rows[i+2]
+		if len(row) != TargetCols {
+			t.Errorf("row %d length = %d, want %d", i+2, len(row), TargetCols)
+		}
+		if row[0] != "" || row[1] != want.b || row[3] != want.d || row[4] != want.e {
+			t.Errorf("row %d head wrong: %v", i+2, row[:5])
 		}
 	}
 }
@@ -83,5 +124,11 @@ func TestApply_EmptyInput(t *testing.T) {
 	got := Apply(rows)
 	if len(got) != 0 {
 		t.Fatalf("empty input should yield empty output, got %v", got)
+	}
+}
+
+func TestTargetHeader_HasExpectedLength(t *testing.T) {
+	if len(TargetHeader) != TargetCols {
+		t.Fatalf("TargetHeader len = %d, want %d", len(TargetHeader), TargetCols)
 	}
 }

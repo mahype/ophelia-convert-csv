@@ -4,8 +4,10 @@ Kleines Tray-Tool, das einen Ordner überwacht und neue DATEV-CSV-Dateien automa
 umsortiert:
 
 - **Zeile 1** bleibt unverändert (EXTF-Metadaten).
-- **Zeile 2** (Kopfzeile) bekommt Spalte A geleert.
-- **Zeile 3+** (Datenzeilen): Spalte D = alte Spalte B; Spalte B = alte Spalte A; Spalte A = leer.
+- **Zeile 2** (Kopfzeile) wird komplett durch den 254-spaltigen DATEV-Debitoren-Header
+  (`transform.TargetHeader`) ersetzt.
+- **Zeile 3+** (Datenzeilen): rechts mit leeren Feldern auf 254 Spalten aufgefüllt, dann
+  Spalte D = alte Spalte B; Spalte B = alte Spalte A; Spalte A = leer.
 
 Das Original landet danach im Unterordner `verarbeitet/`, die umgewandelte Datei nimmt
 den Namen der Originaldatei im überwachten Ordner ein.

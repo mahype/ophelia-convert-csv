@@ -35,7 +35,6 @@ func TestEndToEnd_RealExampleFile(t *testing.T) {
 		t.Fatalf("row 3 col B = %q, want %q", rows[2][1], "Traumschloss AG")
 	}
 
-	colCount := len(rows[1])
 	row1Copy := append([]string(nil), rows[0]...)
 
 	transform.Apply(rows)
@@ -49,16 +48,25 @@ func TestEndToEnd_RealExampleFile(t *testing.T) {
 		}
 	}
 
-	if rows[1][0] != "" {
-		t.Errorf("row 2 A not cleared: %q", rows[1][0])
+	if len(rows[1]) != transform.TargetCols {
+		t.Fatalf("row 2 length = %d, want %d", len(rows[1]), transform.TargetCols)
 	}
-	if rows[1][1] != "Konto" {
-		t.Errorf("row 2 B = %q, want unchanged %q", rows[1][1], "Konto")
+	header := map[int]string{
+		0:   "Konto",
+		1:   "Name (Adressattyp Unternehmen)",
+		8:   "EU-Land",
+		203: "SWIFTCode 9",
+		253: "Letzte Frist",
 	}
-	if len(rows[1]) != colCount {
-		t.Errorf("row 2 column count changed: %d vs %d", len(rows[1]), colCount)
+	for i, want := range header {
+		if rows[1][i] != want {
+			t.Errorf("row 2 col %d = %q, want %q", i+1, rows[1][i], want)
+		}
 	}
 
+	if len(rows[2]) != transform.TargetCols {
+		t.Errorf("row 3 length = %d, want %d", len(rows[2]), transform.TargetCols)
+	}
 	if rows[2][0] != "" {
 		t.Errorf("row 3 A not cleared: %q", rows[2][0])
 	}
@@ -84,8 +92,11 @@ func TestEndToEnd_RealExampleFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("decode: %v", err)
 	}
-	if !bytes.Contains(decoded, []byte("Adressattyp Unternehmen")) {
-		t.Error("expected preserved umlauts in header (Adressattyp Unternehmen)")
+	if !bytes.Contains(decoded, []byte("Name (Adressattyp Unternehmen)")) {
+		t.Error("expected target header present with umlauts")
+	}
+	if !bytes.Contains(decoded, []byte("Straße")) {
+		t.Error("expected ß preserved in target header (Straße)")
 	}
 	if !bytes.Contains(raw, []byte{0x0d, 0x0a}) {
 		t.Error("expected CRLF line endings in output")
