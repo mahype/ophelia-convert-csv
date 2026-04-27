@@ -55,7 +55,7 @@ func TestEndToEnd_RealExampleFile(t *testing.T) {
 		0:   "Konto",
 		1:   "Name (Adressattyp Unternehmen)",
 		8:   "EU-Land",
-		203: "SWIFTCode 9",
+		203: "SWIFT-Code 9",
 		253: "Letzte Frist",
 	}
 	for i, want := range header {
@@ -70,8 +70,11 @@ func TestEndToEnd_RealExampleFile(t *testing.T) {
 	if rows[2][0] != "500192" {
 		t.Errorf("row 3 col 1 = %q, want %q", rows[2][0], "500192")
 	}
-	if rows[2][1] != "Traumschloss AG" {
-		t.Errorf("row 3 col 2 = %q, want %q", rows[2][1], "Traumschloss AG")
+	if rows[2][1] != "" {
+		t.Errorf("row 3 col 2 = %q, want empty (firma wandert nach col 4)", rows[2][1])
+	}
+	if rows[2][3] != "Traumschloss AG" {
+		t.Errorf("row 3 col 4 = %q, want %q", rows[2][3], "Traumschloss AG")
 	}
 	if rows[2][15] != "Im Hexfeld 22" {
 		t.Errorf("row 3 col 16 = %q, want %q", rows[2][15], "Im Hexfeld 22")

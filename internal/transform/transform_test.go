@@ -44,9 +44,9 @@ func TestApply_Row2LandmarkCells(t *testing.T) {
 		1:   "Name (Adressattyp Unternehmen)",
 		8:   "EU-Land",
 		9:   "EU-UStID",
-		95:  "Leerfeld 1",
-		203: "SWIFTCode 9",
-		221: "SEPA Mandatsreferenz 1",
+		95:  "Leerfeld",
+		203: "SWIFT-Code 9",
+		221: "SEPA-Mandatsreferenz 1",
 		253: "Letzte Frist",
 	}
 	for i, want := range checks {
@@ -56,7 +56,7 @@ func TestApply_Row2LandmarkCells(t *testing.T) {
 	}
 }
 
-func TestApply_DataRowUnchangedAndPadded(t *testing.T) {
+func TestApply_DataRowShiftsCol1ToCol3AndPads(t *testing.T) {
 	rows := [][]string{
 		{"EXTF"},
 		{"Adressnummer", "Konto"},
@@ -66,7 +66,7 @@ func TestApply_DataRowUnchangedAndPadded(t *testing.T) {
 	if len(rows[2]) != TargetCols {
 		t.Fatalf("data row length = %d, want %d", len(rows[2]), TargetCols)
 	}
-	wantHead := []string{"500192", "Traumschloss AG", "", "", "Rest5", "Rest6"}
+	wantHead := []string{"500192", "", "", "Traumschloss AG", "Rest5", "Rest6"}
 	if !reflect.DeepEqual(rows[2][:6], wantHead) {
 		t.Fatalf("row 3 head: got %v, want %v", rows[2][:6], wantHead)
 	}
@@ -87,8 +87,8 @@ func TestApply_ShortRowIsPaddedTo254(t *testing.T) {
 	if len(rows[2]) != TargetCols {
 		t.Fatalf("short row not padded: len = %d, want %d", len(rows[2]), TargetCols)
 	}
-	if rows[2][0] != "500192" || rows[2][1] != "Traumschloss AG" {
-		t.Errorf("row 3 head changed unexpectedly: %v", rows[2][:2])
+	if rows[2][0] != "500192" || rows[2][1] != "" || rows[2][3] != "Traumschloss AG" {
+		t.Errorf("row 3 head wrong: %v", rows[2][:4])
 	}
 }
 
@@ -103,7 +103,7 @@ func TestApply_MultipleDataRows(t *testing.T) {
 	Apply(rows)
 
 	for i, want := range []struct {
-		a, b, e string
+		konto, name, vorname string
 	}{
 		{"500192", "Firma A", "X"},
 		{"500193", "Firma B", "Y"},
@@ -113,7 +113,7 @@ func TestApply_MultipleDataRows(t *testing.T) {
 		if len(row) != TargetCols {
 			t.Errorf("row %d length = %d, want %d", i+2, len(row), TargetCols)
 		}
-		if row[0] != want.a || row[1] != want.b || row[4] != want.e {
+		if row[0] != want.konto || row[1] != "" || row[3] != want.name || row[4] != want.vorname {
 			t.Errorf("row %d head wrong: %v", i+2, row[:5])
 		}
 	}

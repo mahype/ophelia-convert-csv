@@ -2,15 +2,16 @@
 //
 //	Zeile 1:   unverändert (EXTF-Metadaten)
 //	Zeile 2:   komplett durch TargetHeader (254 Spalten) ersetzt
-//	Zeile 3+:  unverändert, bei Bedarf rechts auf 254 Spalten aufgefüllt
+//	Zeile 3+:  bei Bedarf rechts auf 254 Spalten aufgefüllt; Wert aus Spalte 1
+//	           (Div-Adressen "Konto" = Firmenname) wandert nach Spalte 3
+//	           (GP-Stamm "Name (Adressattyp natürl. Person)").
 package transform
 
 // TargetCols ist die DATEV-Debitoren-Spaltenzahl (254).
 const TargetCols = 254
 
-// TargetHeader ist Zeile 2 der fertig-Datei, 1:1 übernommen.
-// Die Schreibweise "SWIFTCode 9" (Spalte 204, ohne Bindestrich) ist so aus der
-// Vorlage — bitte nicht "korrigieren", sonst weicht der Output von der Vorlage ab.
+// TargetHeader ist Zeile 2 der fertig-Datei, 1:1 übernommen aus
+// KONVERTIERT_EXTF_GP_Stamm_20260326_113199.csv.
 var TargetHeader = []string{
 	"Konto",
 	"Name (Adressattyp Unternehmen)",
@@ -57,7 +58,7 @@ var TargetHeader = []string{
 	"Bank-Kontonummer 1",
 	"Länderkennzeichen 1",
 	"IBAN-Nr. 1",
-	"IBAN1 korrekt",
+	"Leerfeld",
 	"SWIFT-Code 1",
 	"Abw. Kontoinhaber 1",
 	"Kennz. Hauptbankverb. 1",
@@ -68,7 +69,7 @@ var TargetHeader = []string{
 	"Bank-Kontonummer 2",
 	"Länderkennzeichen 2",
 	"IBAN-Nr. 2",
-	"IBAN2 korrekt",
+	"Leerfeld",
 	"SWIFT-Code 2",
 	"Abw. Kontoinhaber 2",
 	"Kennz. Hauptbankverb. 2",
@@ -79,7 +80,7 @@ var TargetHeader = []string{
 	"Bank-Kontonummer 3",
 	"Länderkennzeichen 3",
 	"IBAN-Nr. 3",
-	"IBAN3 korrekt",
+	"Leerfeld",
 	"SWIFT-Code 3",
 	"Abw. Kontoinhaber 3",
 	"Kennz. Hauptbankverb. 3",
@@ -90,7 +91,7 @@ var TargetHeader = []string{
 	"Bank-Kontonummer 4",
 	"Länderkennzeichen 4",
 	"IBAN-Nr. 4",
-	"IBAN4 korrekt",
+	"Leerfeld",
 	"SWIFT-Code 4",
 	"Abw. Kontoinhaber 4",
 	"Kennz. Hauptbankverb. 4",
@@ -101,16 +102,16 @@ var TargetHeader = []string{
 	"Bank-Kontonummer 5",
 	"Länderkennzeichen 5",
 	"IBAN-Nr. 5",
-	"IBAN5 korrekt",
+	"Leerfeld",
 	"SWIFT-Code 5",
 	"Abw. Kontoinhaber 5",
 	"Kennz. Hauptbankverb. 5",
 	"Bankverb 5 Gültig von",
 	"Bankverb 5 Gültig bis",
-	"Leerfeld 1",
+	"Leerfeld",
 	"Briefanrede",
 	"Grußformel",
-	"Kundennummer",
+	"Kunden-/Lief.-Nr.",
 	"Steuernummer",
 	"Sprache",
 	"Ansprechpartner",
@@ -145,7 +146,7 @@ var TargetHeader = []string{
 	"Mahnzinssatz 2",
 	"Mahnzinssatz 3",
 	"Lastschrift",
-	"Leerfeld 2",
+	"Leerfeld",
 	"Mandantenbank",
 	"Zahlungsträger",
 	"Indiv. Feld 1",
@@ -181,7 +182,7 @@ var TargetHeader = []string{
 	"Bank-Kontonummer 6",
 	"Länderkennzeichen 6",
 	"IBAN-Nr. 6",
-	"IBAN6 korrekt",
+	"Leerfeld",
 	"SWIFT-Code 6",
 	"Abw. Kontoinhaber 6",
 	"Kennz. Hauptbankverb. 6",
@@ -192,7 +193,7 @@ var TargetHeader = []string{
 	"Bank-Kontonummer 7",
 	"Länderkennzeichen 7",
 	"IBAN-Nr. 7",
-	"IBAN7 korrekt",
+	"Leerfeld",
 	"SWIFT-Code 7",
 	"Abw. Kontoinhaber 7",
 	"Kennz. Hauptbankverb. 7",
@@ -203,7 +204,7 @@ var TargetHeader = []string{
 	"Bank-Kontonummer 8",
 	"Länderkennzeichen 8",
 	"IBAN-Nr. 8",
-	"IBAN8 korrekt",
+	"Leerfeld",
 	"SWIFT-Code 8",
 	"Abw. Kontoinhaber 8",
 	"Kennz. Hauptbankverb. 8",
@@ -214,8 +215,8 @@ var TargetHeader = []string{
 	"Bank-Kontonummer 9",
 	"Länderkennzeichen 9",
 	"IBAN-Nr. 9",
-	"IBAN9 korrekt",
-	"SWIFTCode 9",
+	"Leerfeld",
+	"SWIFT-Code 9",
 	"Abw. Kontoinhaber 9",
 	"Kennz. Hauptbankverb. 9",
 	"Bankverb 9 Gültig von",
@@ -225,7 +226,7 @@ var TargetHeader = []string{
 	"Bank-Kontonummer 10",
 	"Länderkennzeichen 10",
 	"IBAN-Nr. 10",
-	"IBAN10 korrekt",
+	"Leerfeld",
 	"SWIFT-Code 10",
 	"Abw. Kontoinhaber 10",
 	"Kennz. Hauptbankverb. 10",
@@ -233,25 +234,25 @@ var TargetHeader = []string{
 	"Bankverb 10 Gültig bis",
 	"Nummer Fremdsystem",
 	"Insolvent",
-	"SEPA Mandatsreferenz 1",
-	"SEPA Mandatsreferenz 2",
-	"SEPA Mandatsreferenz 3",
-	"SEPA Mandatsreferenz 4",
-	"SEPA Mandatsreferenz 5",
-	"SEPA Mandatsreferenz 6",
-	"SEPA Mandatsreferenz 7",
-	"SEPA Mandatsreferenz 8",
-	"SEPA Mandatsreferenz 9",
-	"SEPA Mandatsreferenz 10",
-	"Verknüpftes OPOS-Konto 1",
+	"SEPA-Mandatsreferenz 1",
+	"SEPA-Mandatsreferenz 2",
+	"SEPA-Mandatsreferenz 3",
+	"SEPA-Mandatsreferenz 4",
+	"SEPA-Mandatsreferenz 5",
+	"SEPA-Mandatsreferenz 6",
+	"SEPA-Mandatsreferenz 7",
+	"SEPA-Mandatsreferenz 8",
+	"SEPA-Mandatsreferenz 9",
+	"SEPA-Mandatsreferenz 10",
+	"Verknüpftes OPOS-Konto",
 	"Mahnsperre bis",
 	"Lastschriftsperre bis",
 	"Zahlungssperre bis",
 	"Gebührenberechnung",
-	"Mahngebuehr 1",
-	"Mahngebuehr 2",
-	"Mahngebuehr 3",
-	"Pauschalenberechnung 3",
+	"Mahngebühr 1",
+	"Mahngebühr 2",
+	"Mahngebühr 3",
+	"Pauschalenberechnung",
 	"Verzugspauschale 1",
 	"Verzugspauschale 2",
 	"Verzugspauschale 3",
@@ -280,6 +281,8 @@ func Apply(rows [][]string) [][]string {
 		for len(rows[i]) < TargetCols {
 			rows[i] = append(rows[i], "")
 		}
+		rows[i][3] = rows[i][1]
+		rows[i][1] = ""
 	}
 	return rows
 }
